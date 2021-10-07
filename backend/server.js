@@ -51,9 +51,14 @@ io.on("connection", (socket) => {
 
   // Listen for chatMessage
   socket.on("chatMessage", (msg) => {
-    const user = getCurrentUser(socket.id);
+    try {
+      const user = getCurrentUser(socket.id);
+      console.log(user);
 
-    io.to(user.room).emit("message", formatMessage(user.username, msg));
+      io.to(user.room).emit("message", formatMessage(user.username, msg));
+    } catch (err) {
+      console.log(err);
+    }
   });
 
   socket.on("disconnect", () => {

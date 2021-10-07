@@ -1,13 +1,12 @@
-import React, { Component, useState, createRef, useEffect } from "react";
+import React, { Component, createRef } from "react";
 
 import "./chatContent.css";
 import Avatar from "../chatList/Avatar";
 import ChatItem from "./ChatItem";
-import io from "socket.io-client";
-import path from "path";
-import Qs from "query-string";
+import { socket } from "../socket/SocketConfig";
+import { createRandomString } from "../utils/utils";
 
-const socket = io.connect("http://localhost:5000", { path: "/api/socket" });
+import Qs from "query-string";
 
 export default class ChatContent extends Component {
   messagesEndRef = createRef(null);
@@ -71,14 +70,9 @@ export default class ChatContent extends Component {
     };
   }
 
-  testSocketIo = () => {
-    console.log("Hello World");
-    let { username, room } = Qs.parse(window.location.search, {
-      ignoreQueryPrefix: true,
-    });
-    username = "david";
-    room = "123";
-    socket.emit("joinRoom", { username, room });
+  testSocketIO = () => {
+    let message = this.state.msg;
+    socket.emit("chatMessage", { message });
   };
 
   scrollToBottom = () => {
@@ -86,18 +80,15 @@ export default class ChatContent extends Component {
   };
 
   componentDidMount() {
-    socket.on("roomUsers", ({ room, users }) => {
-      console.log(room);
-      console.log(users);
-    });
-
     window.addEventListener("keydown", (e) => {
       if (e.keyCode === 13) {
         if (this.state.msg !== "") {
+          let message = this.state.msg;
+          socket.emit("chatMessage", { message });
           this.chatItms.push({
-            key: 1,
+            key: createRandomString(30),
             type: "",
-            msg: this.state.msg,
+            msg: message,
             image:
               "https://pbs.twimg.com/profile_images/1116431270697766912/-NfnQHvh_400x400.jpg",
           });
@@ -165,7 +156,7 @@ export default class ChatContent extends Component {
             <button
               className="btnSendMsg"
               id="sendMsgBtn"
-              onClick={this.testSocketIo}
+              onClick={this.testSocketIO}
             >
               <i className="fa fa-paper-plane"></i>
             </button>

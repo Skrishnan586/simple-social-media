@@ -1,8 +1,21 @@
 import React, { Component } from "react";
 import "./chatList.css";
 import ChatListItems from "./ChatListItems";
+import { socket } from "../socket/SocketConfig";
+
+import Qs from "query-string";
 
 export default class ChatList extends Component {
+  newChat = () => {
+    console.log("Hello World");
+    let { username, room } = Qs.parse(window.location.search, {
+      ignoreQueryPrefix: true,
+    });
+    username = "david";
+    room = "123";
+    socket.emit("joinRoom", { username, room });
+  };
+
   allChatUsers = [
     {
       image:
@@ -93,7 +106,7 @@ export default class ChatList extends Component {
   render() {
     return (
       <div className="main__chatlist">
-        <button className="btn">
+        <button className="btn" onClick={this.newChat}>
           <i className="fa fa-plus"></i>
           <span>New conversation</span>
         </button>
