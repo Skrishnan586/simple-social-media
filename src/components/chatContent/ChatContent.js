@@ -4,12 +4,13 @@ import "./chatContent.css";
 import Avatar from "../chatList/Avatar";
 import ChatItem from "./ChatItem";
 import { socket } from "../socket/SocketConfig";
+import SocketOn from "../socket/SocketOn";
 import { createRandomString } from "../utils/utils";
-
-import Qs from "query-string";
+import { EventEmitter } from "../events/events";
 
 export default class ChatContent extends Component {
   messagesEndRef = createRef(null);
+
   chatItms = [
     {
       key: 1,
@@ -64,6 +65,7 @@ export default class ChatContent extends Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
       chat: this.chatItms,
       msg: "",
@@ -79,27 +81,50 @@ export default class ChatContent extends Component {
     this.messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
   };
 
+  addChat = (data) => {
+    let message = data.text.message;
+    console.log(this.state.msg);
+    this.chatItms.push({
+      key: createRandomString(30),
+      type: "",
+      msg: message,
+      image:
+        "https://pbs.twimg.com/profile_images/1116431270697766912/-NfnQHvh_400x400.jpg",
+    });
+    this.setState({ chat: [...this.chatItms] });
+    this.setState({ msg: "" });
+    this.scrollToBottom();
+    if (this.state.msg !== "") {
+    }
+  };
+
   componentDidMount() {
+    EventEmitter.subscribe("subscribeChat", (event) => this.addChat(event));
+    this.scrollToBottom();
     window.addEventListener("keydown", (e) => {
       if (e.keyCode === 13) {
-        if (this.state.msg !== "") {
-          let message = this.state.msg;
-          socket.emit("chatMessage", { message });
-          this.chatItms.push({
-            key: createRandomString(30),
-            type: "",
-            msg: message,
-            image:
-              "https://pbs.twimg.com/profile_images/1116431270697766912/-NfnQHvh_400x400.jpg",
-          });
-          this.setState({ chat: [...this.chatItms] });
-          this.scrollToBottom();
-          this.setState({ msg: "" });
-        }
+        // EventEmitter.subscribe("subscribeChat", this.addChat);
+        // if (this.state.msg !== "") {
+        //   let message = this.state.msg;
+        //   socket.emit("chatMessage", { message });
+        //   this.chatItms.push({
+        //     key: createRandomString(30),
+        //     type: "",
+        //     msg: message,
+        //     image:
+        //       "https://pbs.twimg.com/profile_images/1116431270697766912/-NfnQHvh_400x400.jpg",
+        //   });
+        //   this.setState({ chat: [...this.chatItms] });
+        //   this.scrollToBottom();
+        //   this.setState({ msg: "" });
+        // }
+      } else {
+        //EventEmitter.subscribe("subscribeChat", this.addChat);
       }
     });
-    this.scrollToBottom();
+    // this.scrollToBottom();
   }
+
   onStateChange = (e) => {
     this.setState({ msg: e.target.value });
   };
@@ -107,6 +132,7 @@ export default class ChatContent extends Component {
   render() {
     return (
       <div className="main__chatcontent">
+        <SocketOn message="message" />
         <div className="content__header">
           <div className="blocks">
             <div className="current-chatting-user">

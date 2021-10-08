@@ -97,12 +97,14 @@ export default class ChatList extends Component {
       isOnline: true,
     },
   ];
+
   constructor(props) {
     super(props);
     this.state = {
       allChats: this.allChatUsers,
     };
   }
+
   render() {
     return (
       <div className="main__chatlist">

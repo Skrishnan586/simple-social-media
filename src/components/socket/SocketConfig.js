@@ -1,4 +1,6 @@
+import React, { Component } from "react";
 import io from "socket.io-client";
+import { EventEmitter } from "../events/events";
 
 let room_name;
 let users_name;
@@ -8,7 +10,7 @@ export const socket = io.connect("http://localhost:5000", {
 });
 
 socket.on("message", (message) => {
-  console.log(message);
+  EventEmitter.dispatch("subscribeChat", message);
 });
 
 socket.on("roomUsers", ({ room, users }) => {

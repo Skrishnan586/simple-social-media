@@ -54,6 +54,7 @@ io.on("connection", (socket) => {
     try {
       const user = getCurrentUser(socket.id);
       console.log(user);
+      console.log("Message: " + JSON.stringify(msg));
 
       io.to(user.room).emit("message", formatMessage(user.username, msg));
     } catch (err) {
