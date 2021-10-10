@@ -2,6 +2,10 @@ const path = require("path");
 const http = require("http");
 const express = require("express");
 const socketio = require("socket.io");
+const bodyParser = require("body-parser");
+const db = require("./models");
+const Role = db.role;
+const dbConfig = require("./config/db.config");
 
 const formatMessage = require("./utils/messages");
 const {
@@ -20,7 +24,66 @@ const io = socketio(server, { path: "/api/socket" });
 // Set static folder
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/", proxy("http://localhost:3000/"));
+// app.use("/", proxy("http://localhost:3000/"));
+
+app.use(bodyParser.json());
+
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.get("/welcome", (req, res) => {
+  res.json({ message: "Welcome to bezkoder application." });
+});
+
+require("./routes/auth.routes")(app);
+require("./routes/user.routes")(app);
+
+db.mongoose
+  .connect(`mongodb://${dbConfig.HOST}:${dbConfig.PORT}`, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("Successfully connect to MongoDB");
+    initial();
+  })
+  .catch((err) => {
+    console.error("Connection error", err);
+    process.exit();
+  });
+
+function initial() {
+  Role.estimatedDocumentCount((err, count) => {
+    if (!err && count === 0) {
+      new Role({
+        name: "user",
+      }).save((err) => {
+        if (err) {
+          console.log("error", err);
+        }
+
+        console.log("added 'user' to roles collection");
+      });
+
+      new Role({
+        name: "moderator",
+      }).save((err) => {
+        if (err) {
+          console.log("error", err);
+        }
+
+        console.log("added 'moderator' to roles collection");
+      });
+
+      new Role({ name: "admin" }).save((err) => {
+        if (err) {
+          console.log("error", err);
+        }
+
+        console.log("added 'admin' to roles collection");
+      });
+    }
+  });
+}
 
 const botName = "ChatCord Bot";
 
