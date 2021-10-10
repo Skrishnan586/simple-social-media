@@ -24,7 +24,7 @@ const io = socketio(server, { path: "/api/socket" });
 // Set static folder
 app.use(express.static(path.join(__dirname, "public")));
 
-// app.use("/", proxy("http://localhost:3000/"));
+app.use("/", proxy("http://localhost:3000/"));
 
 app.use(bodyParser.json());
 
